@@ -1,0 +1,124 @@
+CREATE OR REPLACE PROCEDURE generate_patient_report IS
+    CURSOR patient_cursor IS
+        SELECT PatientID, Name, Age, DOB, Gender, Address, Contact_Info, AppLIID, PatientAdminID
+        FROM Patient;
+
+    -- Variable to hold the formatted report output
+    v_report_line VARCHAR2(400);
+BEGIN
+    -- Print report header
+    DBMS_OUTPUT.PUT_LINE('---------------------------------------------------');
+    DBMS_OUTPUT.PUT_LINE('                  PATIENT REPORT                   ');
+    DBMS_OUTPUT.PUT_LINE('---------------------------------------------------');
+    DBMS_OUTPUT.PUT_LINE('PatientID | Name          | Age | DOB        | Gender | Address         | Contact Info | AppLIID | PatientAdminID');
+    DBMS_OUTPUT.PUT_LINE('------------------------------------------------------------------------------------------------');
+
+    -- Loop through the patient records
+    FOR patient_record IN patient_cursor LOOP
+        v_report_line := patient_record.PatientID || ' | ' ||
+                         patient_record.Name || ' | ' ||
+                         patient_record.Age || ' | ' ||
+                         TO_CHAR(patient_record.DOB, 'YYYY-MM-DD') || ' | ' ||
+                         patient_record.Gender || ' | ' ||
+                         patient_record.Address || ' | ' ||
+                         patient_record.Contact_Info || ' | ' ||
+                         NVL(patient_record.AppLIID, 'N/A') || ' | ' ||
+                         patient_record.PatientAdminID;
+
+        -- Print the formatted line
+        DBMS_OUTPUT.PUT_LINE(v_report_line);
+    END LOOP;
+
+    -- Print footer
+    DBMS_OUTPUT.PUT_LINE('---------------------------------------------------');
+END;
+/
+
+create or replace NONEDITIONABLE PROCEDURE list_wards AS
+    CURSOR c_ward IS
+        SELECT WardID, No_of_Patients, No_of_Beds, WardAdminID FROM Ward;
+
+    v_ward c_ward%ROWTYPE;
+BEGIN
+    OPEN c_ward;
+    LOOP
+        FETCH c_ward INTO v_ward;
+        EXIT WHEN c_ward%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE('Ward ID: ' || v_ward.WardID || 
+                             ', No. of Patients: ' || v_ward.No_of_Patients || 
+                             ', No. of Beds: ' || v_ward.No_of_Beds || 
+                             ', Ward Admin ID: ' || v_ward.WardAdminID);
+    END LOOP;
+    CLOSE c_ward;
+END list_wards;
+
+
+create or replace NONEDITIONABLE PROCEDURE report_appointments AS
+    CURSOR c_appointments IS
+        SELECT AppointmentID, AppointmentDate, AppointmentTime, DoctorID
+        FROM Appointment;
+
+    v_appointment c_appointments%ROWTYPE;
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Appointments Report');
+    DBMS_OUTPUT.PUT_LINE('-----------------------------------');
+    OPEN c_appointments;
+    LOOP
+        FETCH c_appointments INTO v_appointment;
+        EXIT WHEN c_appointments%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE('Appointment ID: ' || v_appointment.AppointmentID || 
+                             ', Date: ' || v_appointment.AppointmentDate || 
+                             ', Time: ' || v_appointment.AppointmentTime || 
+                             ', Doctor ID: ' || v_appointment.DoctorID);
+    END LOOP;
+    CLOSE c_appointments;
+END report_appointments;
+
+
+
+create or replace NONEDITIONABLE PROCEDURE report_doctors AS
+    CURSOR c_doctors IS
+        SELECT DoctorID, Name, Gender, Specialization, Address
+        FROM Doctor;
+
+    v_doctor c_doctors%ROWTYPE;
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Doctors Report');
+    DBMS_OUTPUT.PUT_LINE('-----------------------------------');
+    OPEN c_doctors;
+    LOOP
+        FETCH c_doctors INTO v_doctor;
+        EXIT WHEN c_doctors%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE('Doctor ID: ' || v_doctor.DoctorID || 
+                             ', Name: ' || v_doctor.Name || 
+                             ', Gender: ' || v_doctor.Gender || 
+                             ', Specialization: ' || v_doctor.Specialization || 
+                             ', Address: ' || v_doctor.Address);
+    END LOOP;
+    CLOSE c_doctors;
+END report_doctors;
+
+
+create or replace NONEDITIONABLE PROCEDURE report_payments AS
+    CURSOR c_payments IS
+        SELECT PaymentID, InvoiceNo, paymentTime, paymentDate, Status, PatientID, DoctorID
+        FROM Payment;
+
+    v_payment c_payments%ROWTYPE;
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Payments Report');
+    DBMS_OUTPUT.PUT_LINE('-----------------------------------');
+    OPEN c_payments;
+    LOOP
+        FETCH c_payments INTO v_payment;
+        EXIT WHEN c_payments%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE('Payment ID: ' || v_payment.PaymentID || 
+                             ', Invoice No: ' || v_payment.InvoiceNo || 
+                             ', Time: ' || v_payment.paymentTime || 
+                             ', Date: ' || v_payment.paymentDate || 
+                             ', Status: ' || v_payment.Status || 
+                             ', Patient ID: ' || v_payment.PatientID || 
+                             ', Doctor ID: ' || v_payment.DoctorID);
+    END LOOP;
+    CLOSE c_payments;
+END report_payments;
