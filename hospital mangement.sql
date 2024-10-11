@@ -149,6 +149,7 @@ CREATE TABLE Payment (
     CONSTRAINT fk_payment_doctor FOREIGN KEY (DoctorID)
         REFERENCES Doctor(DoctorID)
 );
+set SERVEROUTPUT on;
 CREATE OR REPLACE PROCEDURE add_mainadmin (
     p_adminID IN NUMBER,
     p_name IN VARCHAR2,
@@ -165,7 +166,7 @@ BEGIN
 END;
 /
 
- DELETE FROM MainAdmins;
+ 
 BEGIN
     add_mainadmin(1, 'Alice Smith', 35, TO_DATE('1989-06-15', 'YYYY-MM-DD'), 'Female', '123 Main St', '1234567890');
 END;
@@ -1977,3 +1978,109 @@ BEGIN
     END LOOP;
     CLOSE c_payments;
 END report_payments;
+
+
+BEGIN
+   report_appointments;
+END;
+/
+
+BEGIN
+   list_wards;
+END;
+/
+BEGIN
+  report_doctors;
+END;
+/
+BEGIN
+   report_payments;
+END;
+/
+
+
+
+--users management 
+
+alter session set "_ORACLE_SCRIPT" = true;
+
+--create users
+create User mainadmin identified by system;
+
+create User patientadmin identified by system;
+
+create User surgeryadmin identified by system;
+create User wardadmin identified by system;
+create User doctoradmin identified by system;
+
+
+
+
+
+
+--grant privilleges for each users
+
+--system privilleges to mainadmin
+grant create session to mainadmin;
+
+
+
+
+
+
+--object privilleges
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON appointment TO mainadmin;
+GRANT SELECT, INSERT, UPDATE, DELETE ON doctor TO mainadmin;
+GRANT SELECT, INSERT, UPDATE, DELETE ON doctoradmins TO mainadmin;
+GRANT SELECT, INSERT, UPDATE, DELETE ON mainadmins TO mainadmin;
+GRANT SELECT, INSERT, UPDATE, DELETE ON patient TO mainadmin;
+GRANT SELECT, INSERT, UPDATE, DELETE ON patientadmins TO mainadmin;
+GRANT SELECT, INSERT, UPDATE, DELETE ON payment TO mainadmin;
+GRANT SELECT, INSERT, UPDATE, DELETE ON room TO mainadmin;
+GRANT SELECT, INSERT, UPDATE, DELETE ON surgery TO mainadmin;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ward TO mainadmin;
+GRANT SELECT, INSERT, UPDATE, DELETE ON wardadmins TO mainadmin;
+GRANT SELECT, INSERT, UPDATE, DELETE ON surgeryadmins TO mainadmin;
+
+--grant system privillege for patientadmin
+
+grant create session to patientadmin;
+
+--object privilleges for patientadmin
+GRANT SELECT, INSERT, UPDATE, DELETE ON patient TO patientadmin;
+GRANT SELECT, INSERT, UPDATE, DELETE ON patientadmins TO patientadmin;
+
+--grant system privillege for doctoradmin
+
+grant create session to doctoradmin;
+
+--object privilleges for doctoradmin
+GRANT SELECT, INSERT, UPDATE, DELETE ON doctor TO doctoradmin;
+GRANT SELECT, INSERT, UPDATE, DELETE ON appointment TO doctoradmin;
+GRANT SELECT, INSERT, UPDATE, DELETE ON doctoradmins TO doctoradmin;
+
+
+grant create session to wardadmin;
+
+--object privilleges for doctoradmin
+GRANT SELECT, INSERT, UPDATE, DELETE ON wardadmins TO wardadmin;
+GRANT SELECT, INSERT, UPDATE, DELETE ON room TO wardadmin;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ward TO wardadmin;
+
+
+grant create session to surgeryadmin;
+
+--object privilleges for doctoradmin
+GRANT SELECT, INSERT, UPDATE, DELETE ON surgery TO surgeryadmin;
+GRANT SELECT, INSERT, UPDATE, DELETE ON surgeryadmins TO surgeryadmin;
+
+
+--create a role with password;
+create role roleLevel1 identified by admin123;
+create role roleLevel2 identified by patientadmin123;
+create role roleLevel3 identified by surgeryadmin123;
+create role roleLevel4 identified by doctoradmin123;
+create role roleLevel5 identified by wardadmin123;
+
+
